@@ -67,7 +67,9 @@ numeric_classifier_configs = {
 		"multifilter_cmd": '',
 		# "train_cmd_format": 'weka.classifiers.meta.FilteredClassifier -d {output_model_file} -t {filtered_arff_file} -F "weka.filters.MultiFilter -F \"weka.filters.unsupervised.attribute.Remove -R 1\" -F \"weka.filters.supervised.attribute.AttributeSelection -E \\\"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\\\" -S \\\"weka.attributeSelection.GreedyStepwise -T 0.0 -N -1 -num-slots 0\\\"\"" {crossval} -W weka.classifiers.trees.REPTree -- -L 5',
 		# weka.classifiers.meta.FilteredClassifier -F "weka.filters.MultiFilter -F \"weka.filters.unsupervised.attribute.Remove -R 1\"" -W weka.classifiers.meta.Bagging -- -P 50 -S 1 -num-slots 4 -I 20 -W weka.classifiers.trees.M5P -- -M 4.0
-		"train_cmd_format": 'weka.classifiers.meta.FilteredClassifier -d {output_model_file} -t {filtered_arff_file} -F "weka.filters.MultiFilter -F \\"weka.filters.unsupervised.attribute.Remove -R 1\\" -F \\"weka.filters.supervised.attribute.AttributeSelection -E \\\\\\"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\\\\\\" -S \\\\\\"weka.attributeSelection.GreedyStepwise -T 0.0 -N -1 -num-slots 0\\\\\\"\\"" {crossval} -W weka.classifiers.meta.Bagging -- -P 50 -S 1 -num-slots 0 -I 20 -W weka.classifiers.trees.REPTree -- -M 2 -V 0.01 -N 5 -S 1 -L 15 -I 0.0',
+
+		# The -o in next line, directly after the crossval spec, tells weka not to output THE ENTIRE MODEL to stdout, just the summary statistics
+		"train_cmd_format": 'weka.classifiers.meta.FilteredClassifier -d {output_model_file} -t {filtered_arff_file} -F "weka.filters.MultiFilter -F \\"weka.filters.unsupervised.attribute.Remove -R 1\\" -F \\"weka.filters.supervised.attribute.AttributeSelection -E \\\\\\"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\\\\\\" -S \\\\\\"weka.attributeSelection.GreedyStepwise -T 0.0 -N -1 -num-slots 0\\\\\\"\\"" {crossval} -o -W weka.classifiers.meta.Bagging -- -P 50 -S 1 -num-slots 0 -I 20 -W weka.classifiers.trees.REPTree -- -M 2 -V 0.01 -N 5 -S 1 -L 15 -I 0.0',
 		"test_classifier_classname": "weka.classifiers.meta.Bagging",
 	},
 }
@@ -128,7 +130,8 @@ nominal_classifier_configs = {
 	"FilteredRotationForest": {
 		"name": "FilteredRotationForest",
 		"multifilter_cmd": 'weka.filters.MultiFilter -F "{other_filter_cmd}" -F "weka.filters.unsupervised.instance.NonSparseToSparse"',
-		"train_cmd_format": 'weka.Run weka.classifiers.meta.FilteredClassifier -d {output_model_file} -t {filtered_arff_file} -F "weka.filters.MultiFilter -F \\"weka.filters.unsupervised.attribute.Remove -R 1\\" -F \\"weka.filters.supervised.attribute.AttributeSelection -E \\\\\\"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\\\\\\" -S \\\\\\"weka.attributeSelection.BestFirst -D 1 -N 5\\\\\\"\\""  {crossval} -W weka.classifiers.meta.RotationForest -- -G 3 -H 3 -P 80 -F "weka.filters.unsupervised.attribute.PrincipalComponents -R 1.0 -A 5 -M -1" -S 1 -num-slots 0 -I 10 -W weka.classifiers.trees.REPTree -- -M 2 -V 0.001 -N 3 -S 1 -L -1 -I 0.0',
+		# The -o in next line, directly after the crossval spec, tells weka not to output THE ENTIRE MODEL to stdout, just the summary statistics
+		"train_cmd_format": 'weka.Run weka.classifiers.meta.FilteredClassifier -d {output_model_file} -t {filtered_arff_file} -F "weka.filters.MultiFilter -F \\"weka.filters.unsupervised.attribute.Remove -R 1\\" -F \\"weka.filters.supervised.attribute.AttributeSelection -E \\\\\\"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\\\\\\" -S \\\\\\"weka.attributeSelection.BestFirst -D 1 -N 5\\\\\\"\\""  {crossval} -o -W weka.classifiers.meta.RotationForest -- -G 3 -H 3 -P 80 -F "weka.filters.unsupervised.attribute.PrincipalComponents -R 1.0 -A 5 -M -1" -S 1 -num-slots 0 -I 10 -W weka.classifiers.trees.REPTree -- -M 2 -V 0.001 -N 3 -S 1 -L -1 -I 0.0',
 		"test_classifier_classname": "weka.classifiers.meta.RotationForest",
 	},
 }

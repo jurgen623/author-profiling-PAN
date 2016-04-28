@@ -162,6 +162,10 @@ def __main__():
 	if 'all' in targetattrs:
 		targetattrs = ['gender', 'age_group', 'extroverted', 'stable', 'agreeable', 'conscientious', 'open']
 
+	force_lowercase = True
+	if force_lowercase is True:
+		print("\nConverting all training tweet text to lowercase")
+
 	external_commands_list = []
 	if sys.platform == "win32":
 		external_commands_filename = os.path.join(os.curdir, "shell_actions_2016.bat")
@@ -171,18 +175,19 @@ def __main__():
 	input_xml_files = get_input_files(inputdir, '.xml')
 	xml_filenames_by_language, userids_by_language = group_by_language(input_xml_files)
 
-	print('XML filenames and userids by language:')
-	pprint(xml_filenames_by_language)
-	pprint(userids_by_language)
+	# print('XML filenames and userids by language:')
+	# pprint(xml_filenames_by_language)
+	# pprint(userids_by_language)
+
 	# xml_filenames_by_language: keys are ('en', 'es', 'it', 'nl'), values are lists of .xml filenames
 	# userids_by_language: keys are ('en', 'es', 'it', 'nl'), values are lists of userid strings
 
 	for language in xml_filenames_by_language:
 		# Write intermediate .txt files holding cleaned-up and tokenized tweet content, one tweet per line of a file
-		write_preprocessed_tweets(language, xml_filenames_by_language[language], tempdir, tweetwise_split)
+		write_preprocessed_tweets(language, xml_filenames_by_language[language], tempdir, force_lowercase, tweetwise_split)
 
 	input_truth_files = get_input_files(inputdir, "truth.txt")
-	labeled_authors = get_labeled_authors(input_truth_files, userids_by_language, tempdir, force_lowercase=False, config_year=config_year)
+	labeled_authors = get_labeled_authors(input_truth_files, userids_by_language, tempdir, force_lowercase, config_year=config_year)
 	# labeled_authors:
 	# keys are ('en', 'es', 'it', 'nl'),
 	# values are dictionaries whose keys are author userid strings, values are LabeledAuthor objects
@@ -203,7 +208,7 @@ def __main__():
 
 		# ONLY FOR USING MALLET FEATURES:
 		num_topics = 100
-		"""
+
 		alltweets = []
 
 		author_tweet_ranges = dict.fromkeys(training_authors.keys()) # dictionary to keep track of the first and last tweet indexes belonging to each author
@@ -233,10 +238,10 @@ def __main__():
 					alltweets_keys_file.write( "{},{},{},{}\n".format(author_id, range_data['first'], range_data['last'], truth_data) )
 
 			print("Wrote first and last tweet indexes for all {lang} authors to file".format(lang=training_language), alltweets_keys_filename)
-		"""
+
 
 		if sys.platform == "win32":
-			external_commands_list.append('REM make_mallet_files.bat {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
+			external_commands_list.append('make_mallet_files.bat {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
 			# instead of putting this in shell_actions.bat, call using the pycharm run configuration, so we can call doctopics_util.py as its own configuration, using debugger and stuff
 		else:
 			external_commands_list.append('sh make_mallet_files.sh {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
@@ -312,8 +317,8 @@ def __main__():
 
 			short_classifier_name = ""
 
-			# for data_source in ("py", "mallet"):
-			for data_source in ("py",):
+			for data_source in ("py", "mallet"):
+			# for data_source in ("py",):
 				train_filename = "{prefix}_train_{source}.arff".format(prefix=language_class_prefix, source=data_source)
 				train_filepath = os.path.join(outputdir, train_filename)
 				filtered_train_filepath = os.path.join(modeldir, train_filename)

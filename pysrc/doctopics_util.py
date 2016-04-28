@@ -31,6 +31,10 @@ def doctopics_train(language, input_dir, output_dir, num_topics):
 	if "2014" in input_dir:
 		print("Found \"2014\" in input_dir name, setting config_year = \"2014\"")
 		config_year = '2014'
+	elif "2016" in input_dir:
+		# TODO: ADD A '2016' CONFIG_YEAR OPTION!
+		print("Found \"2016\" in input_dir name, setting config_year = \"2014\"")
+		config_year = '2014'
 	elif "2014" in output_dir:
 		print("Found \"2014\" in output_dir name, setting config_year = \"2014\"")
 		config_year = '2014'

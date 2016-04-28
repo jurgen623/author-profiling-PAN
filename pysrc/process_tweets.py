@@ -18,14 +18,17 @@ def trim_url(raw_url):
 	parsed_url = urlparse(raw_url)
 	return urlunparse((parsed_url.scheme, parsed_url.netloc, '', '', '', ''))
 
-def my_preprocess(doctext):
+def my_preprocess(doctext, force_lowercase=False):
 	"""Performs preprocessing/cleanup and tokenization of a single tweet, returns a list of tokens"""
 	words = []
 
-	doctext = doctext.strip()
-
 	# 2016 update: don't necessarily want to lowercase everything at this stage
 	# for word in twokenize.tokenize(doctext.lower()):
+	if force_lowercase is True:
+		doctext = doctext.lower().strip()
+	else:
+		doctext = doctext.strip()
+
 	for word in twokenize.tokenize(doctext):
 
 		# 2016 update: not sure if I really want to filter these out or not...
@@ -256,7 +259,7 @@ def tweets_from_xml_file(filename, split=""):
 	else:
 		return tweets
 
-def write_preprocessed_tweets(language, inputfilenames, tempdir, split=""):
+def write_preprocessed_tweets(language, inputfilenames, tempdir, force_lowercase=False, split=""):
 	print("\nwrite_preprocessed_tweets:", language)
 	
 	processed_file_count = 0
@@ -274,7 +277,7 @@ def write_preprocessed_tweets(language, inputfilenames, tempdir, split=""):
 			
 			with open(outfilename, 'w', encoding='utf8') as out_file_contents:
 				for tweet in tweets:
-					token_list = my_preprocess(tweet)
+					token_list = my_preprocess(tweet, force_lowercase)
 
 					if len(token_list) > 0:
 						newtweet = " ".join(token_list)
