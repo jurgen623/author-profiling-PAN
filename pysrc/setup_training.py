@@ -55,6 +55,10 @@ def __main__():
 	outputdir = os.path.join(os.curdir, outputdir)
 	modeldir = os.path.join(os.curdir, modeldir)
 
+	# If the output or shared directories, and possible subdirectory for this dataset, don't exist, create them now
+	os.makedirs(outputdir, exist_ok=True)
+	os.makedirs(modeldir, exist_ok=True)
+
 	if os.path.exists(inputdir) and os.path.isdir(inputdir):
 		print("Found training inputdir", inputdir)
 		if "2014" in inputdir:
@@ -166,6 +170,10 @@ def __main__():
 
 	input_xml_files = get_input_files(inputdir, '.xml')
 	xml_filenames_by_language, userids_by_language = group_by_language(input_xml_files)
+
+	print('XML filenames and userids by language:')
+	pprint(xml_filenames_by_language)
+	pprint(userids_by_language)
 	# xml_filenames_by_language: keys are ('en', 'es', 'it', 'nl'), values are lists of .xml filenames
 	# userids_by_language: keys are ('en', 'es', 'it', 'nl'), values are lists of userid strings
 
@@ -194,9 +202,9 @@ def __main__():
 		# the last field is the tweet content, which we have already preprocessed
 
 		# ONLY FOR USING MALLET FEATURES:
+		num_topics = 100
 		"""
 		alltweets = []
-		num_topics = 100
 
 		author_tweet_ranges = dict.fromkeys(training_authors.keys()) # dictionary to keep track of the first and last tweet indexes belonging to each author
 		tweets_written = 0
@@ -228,9 +236,8 @@ def __main__():
 		"""
 
 		if sys.platform == "win32":
-			external_commands_list.append('make_mallet_files.bat {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
+			external_commands_list.append('REM make_mallet_files.bat {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
 			# instead of putting this in shell_actions.bat, call using the pycharm run configuration, so we can call doctopics_util.py as its own configuration, using debugger and stuff
-			# print('FAKE COMMAND: make_mallet_files.bat {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
 		else:
 			external_commands_list.append('sh make_mallet_files.sh {lang} {mallet_dest} {arff_dest} {num_topics}'.format(lang=training_language, mallet_dest=modeldir, arff_dest=outputdir, num_topics=num_topics))
 
@@ -365,6 +372,7 @@ def __main__():
 					cmd = 'java -cp "{wekahome}" {command} '.format(wekahome=os.environ['WEKAHOME'], command=cmd)
 				external_commands_file.write(cmd + '\n')
 				external_commands_file.write("ECHO %time% \n")
+				print(cmd)
 		else:
 			external_commands_file.write("#!/bin/bash \n")
 			for cmd in external_commands_list:
@@ -377,10 +385,10 @@ def __main__():
 	print("\nTRAIN: Wrote external training commands to file:", external_commands_filename)
 
 	print("***", time.ctime())
-	print('TRAIN: Removing temporary directory', tempdir)
-	for f in os.listdir(tempdir):
-		os.remove(os.path.join(tempdir, f))
-	os.rmdir(tempdir)
+	# print('TRAIN: Removing temporary directory', tempdir)
+	# for f in os.listdir(tempdir):
+	# 	os.remove(os.path.join(tempdir, f))
+	# os.rmdir(tempdir)
 
 	# --- Only needed to run this once, to get a set of files to compare to with accuracy.py
 	# author_truth_dict = {}
