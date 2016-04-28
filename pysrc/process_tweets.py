@@ -3,12 +3,9 @@ import xml.etree.ElementTree as ET
 from lxml import html
 from bs4 import BeautifulSoup
 from pprint import pprint as pprint
-# import mytokenize
 from arktwokenizepy import twokenize
 from urllib.parse import urlparse, urlunparse
 
-from config2015 import *
-#print("Using configuration for 2015 datasets\n")
 from author2015 import * # includes the Python classes LabeledAuthor and UnlabeledAuthor
 
 def trim_url(raw_url):
@@ -41,7 +38,8 @@ def my_preprocess(doctext):
 			word = "@username"
 
 		# Maybe this should be done on non-urls only... not sure
-		word = word.replace("‘", "'").replace("’", "'").replace("…", "...")
+		word = word.replace("‘", "'").replace("’", "'")
+		# word = word.replace("…", "...")
 
 		if word.startswith("http"):
 			# It's a URL
@@ -72,6 +70,9 @@ def language_from_xml_file(filename):
 		soup = BeautifulSoup(infile.read())
 		author_id = soup.find('author').get('id')
 		author_language = soup.find('author').get('lang')
+
+	if author_id is None: # the PAN 2016 files don't have an id attribute on the author element, so use the base filename without extension
+		author_id = os.path.splitext(os.path.basename( filename ))[0] # [0] will get portion of filename before the .xml
 	return (author_language, author_id)
 
 
@@ -239,7 +240,7 @@ def tweets_from_xml_file(filename, split=""):
 	# End of Investigation time!
 	"""
 
-	PRINTCOUNT = 10
+	PRINTCOUNT = 0
 	if len(tweets) > PRINTCOUNT:
 		# don't print full debug info for every single tweet, just the first PRINTCOUNT
 		tweets = [ remove_tweet_html(tweet, print_debug=True) for tweet in tweets[:PRINTCOUNT] ] + [ remove_tweet_html(tweet) for tweet in tweets[PRINTCOUNT:] ]
@@ -332,6 +333,10 @@ def get_labeled_authors(truthfilenames, userids_by_language, tempdir, force_lowe
 	
 	for filename in truthfilenames:
 		print("\nget_labeled_authors truth file:", filename)
+		print("get_labeled_authors config_year:", config_year)
+		for language in userids_by_language:
+			print('  {count} {lang} usernames'.format(count=len(userids_by_language['en']), lang=language))
+
 		with open(filename, 'r', encoding='utf8') as truth_contents:
 			''' example truth.txt line:
 			user679:::F:::18-24:::0.0:::-0.2:::0.1:::0.0:::0.3
@@ -372,8 +377,9 @@ def get_labeled_authors(truthfilenames, userids_by_language, tempdir, force_lowe
 
 						if len(tweets) > 0:
 							labeled_authors[language][userid] = LabeledAuthor(language, tweets, *row_data)
+							print(labeled_authors[language][userid])
 						else:
-							print("No tweets remained after preprocessing for author:", userid)
+							print("(get_labeled_authors) No tweets remained after preprocessing for author:", userid)
 						
 						break # stop the "for language in userids_by_language" loop
 				
